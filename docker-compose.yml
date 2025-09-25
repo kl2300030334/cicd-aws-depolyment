@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: food_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: food_delivery_db
+    volumes:
+      - db_data:/var/lib/mysql
+    command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+
+  backend:
+    build:
+      context: ./backend
+    container_name: food_backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/food_delivery_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8085
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://frontend
+    ports:
+      - "8085:8085"
+    volumes:
+      - backend_uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: food_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      # used by build if needed; we are serving static with nginx, API points to backend service hostname
+      VITE_API_BASE_URL: http://localhost:8085
+    ports:
+      - "5173:80"
+
+volumes:
+  db_data:
+  backend_uploads:
+
+

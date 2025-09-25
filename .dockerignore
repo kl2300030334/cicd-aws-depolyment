@@ -1,0 +1,17 @@
+.git
+.gitignore
+**/.env
+**/node_modules
+**/dist
+**/build
+**/.next
+**/.cache
+**/.DS_Store
+**/target
+**/.idea
+**/.vscode
+**/*logs*
+**/uploads
+
+
+
